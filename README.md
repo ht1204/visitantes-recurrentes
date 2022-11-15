@@ -14,4 +14,4 @@ El nombre ya existe, debe visualizarse la cantidad de repeticiones (visitas) de 
 
 - Para apagar servidor, presionar la combinación de teclas ```Ctrl + C``` o en ```Command + C``` en Mac
 
-Reto: Visitantes - [Make It Real Bootcamp](http://makeitreal.camp)
+Reto: Visitantes Recurrentes - [Make It Real Bootcamp](http://makeitreal.camp)
