@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Visitantes recurrentes</title>
+</head>
+
+<style>
+    .theader{
+        font-weight: bold;
+    }
+
+</style>
+
+<body>
+    <table class="tg">
+        <thead>
+            <tr>
+                <td class="theader">Id</td>
+                <td class="theader">Name</td>
+                <td class="theader">Visits</td>
+            </tr>
+        </thead>
+        <tbody>
+            <% for (vistor of visitors) { %>
+                <tr>
+                    <td><%= vistor._id %></td>
+                    <td><%= vistor.name %></td>
+                    <td><%= vistor.count %></td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+</body>
+
+</html>
