@@ -39,23 +39,29 @@ app.post("/", async (req, res) => {
   const { query: { name } } = req;
   const paramName = name ? name : 'Anónimo';
   let visitor;
+  console.log('paramName: ', paramName);
 
   const visitorBody = {
     name: paramName,
+    $and: [{ name: { $ne: 'Anónimo' } }],
   }
 
   const transaction = {
-    name: paramName, 
-    $and:[ { name: { $ne: 'Anónimo' } } ],
-    $inc : {count : 1}
+    $inc: { count: 1 }
   };
 
-  const found = await Visitor.findOneAndUpdate(transaction);
-  console.log('found: ', found);
-  if(!found) visitor = new Visitor(visitorBody);
-  else visitor = new Visitor(found);
+
 
   try {
+
+    const visitorUpdated = await Visitor.findOneAndUpdate(visitorBody, transaction, {
+      new: true, 
+      runValidators: true 
+    });
+
+    if (visitorUpdated) visitor = new Visitor(visitorUpdated);
+    else visitor = new Visitor({ name: paramName });
+
     await visitor.save();
     return res.status(200).send(visitor);
   } catch (err) {
