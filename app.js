@@ -14,7 +14,7 @@ mongoose.connection.on('error', () => {
 })
 
 
-const VisitorModel = mongoose.Schema({
+const VisitorSchema = mongoose.Schema({
   name: {
     type: String,
     trim: true,
@@ -25,50 +25,44 @@ const VisitorModel = mongoose.Schema({
   },
 });
 
-const Visitor = mongoose.model('Visitor', VisitorModel);
+const Visitor = mongoose.model('Visitor', VisitorSchema);
 /***************************************************/
 app.set("view engine", "ejs");
 
 app.get("/", async (req, res) => {
-  const visitors = await Visitor.find({});
-  res.render("index.ejs", { visitors });
-});
+ try {
+   const {
+     query: { name },
+   } = req;
+   const paramName = name ? name : 'Anónimo';
 
+   const visitorBody = {
+     name: paramName,
+     $and: [{ name: { $ne: 'Anónimo' } }],
+   };
 
-app.post("/", async (req, res) => {
-  const { query: { name } } = req;
-  const paramName = name ? name : 'Anónimo';
-  let visitor;
-  console.log('paramName: ', paramName);
+   const transaction = {
+     $inc: { count: 1 },
+   };
 
-  const visitorBody = {
-    name: paramName,
-    $and: [{ name: { $ne: 'Anónimo' } }],
-  }
+   let visitor;
 
-  const transaction = {
-    $inc: { count: 1 }
-  };
+   const visitorUpdated = await Visitor.findOneAndUpdate(
+     visitorBody,
+     transaction,
+     { new: true, upsert: true }
+   );
 
+   if (visitorUpdated) visitor = visitorUpdated;
+   else visitor = new Visitor({ name: paramName });
 
+   await visitor.save();
 
-  try {
-
-    const visitorUpdated = await Visitor.findOneAndUpdate(visitorBody, transaction, {
-      new: true, 
-      runValidators: true 
-    });
-
-    if (visitorUpdated) visitor = new Visitor(visitorUpdated);
-    else visitor = new Visitor({ name: paramName });
-
-    await visitor.save();
-    return res.status(200).send(visitor);
-  } catch (err) {
-    return res.status(400).json({
-      err
-    })
-  }
+   const visitors = await Visitor.find({});
+   res.render('index.ejs', { visitors });
+ } catch (err) {
+   res.status(500).send('Server Error');
+ }
 });
 
 app.listen(PORT, () => {
